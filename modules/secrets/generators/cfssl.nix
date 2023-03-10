@@ -21,7 +21,7 @@ let
   caConfig = builtins.toFile "ca-config.json" (builtins.toJSON {
     signing.profiles = {
       server = { inherit (defaults) expiry; usages = [ "signing" "key encipherment" "client auth" "server auth" ]; };
-      client = { inherit (defaults) expiry; usages = [ "signing" "key encipherment" "client auth" "server auth" ]; };
+      client = { inherit (defaults) expiry; usages = [ "signing" "key encipherment" "client auth" ]; };
       peer = { inherit (defaults) expiry; usages = [ "signing" "key encipherment" "client auth" ]; };
     };
   });
@@ -58,8 +58,8 @@ in
               else
                 cfssl gencert \
                     -loglevel 2 \
-                    -ca <(secret_read "$ca.pem") \
-                    -ca-key <(secret_read "$ca-key.pem") \
+                    -ca <(secret_read "$ca") \
+                    -ca-key <(secret_read "$ca-key") \
                     -config "${caConfig}" \
                     -profile "$profile" \
                     <(echo -n "$csr") \
