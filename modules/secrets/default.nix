@@ -141,11 +141,19 @@ in
           # with bash process substitution capture in order
           # to avoid parallel execution
 
-          ${concatStringsSep "\n" (map (v:
-          ''secret_${builtins.toString v.index}="$(get_secret ${escapeShellArgs [
+          # Also see this good note: https://stackoverflow.com/a/15184414
+
+          ${concatStringsSep "\n" (map (v: let
+            vname = "secret_${builtins.toString v.index}";
+          in ''
+          IFS= read -rd ''' ${vname} < <(
+            get_secret ${escapeShellArgs [
               v.name v.value.command
-          ]})"; export secret_${builtins.toString v.index}''
-          ) files)}
+            ]}
+          )
+
+          export ${vname}
+          '') files)}
 
           jq --null-input --compact-output \
             '{
