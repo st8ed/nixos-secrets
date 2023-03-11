@@ -25,6 +25,7 @@ in
     ./generators/hostkey-openssh.nix
     ./generators/cfssl.nix
     ./generators/kubeconfig.nix
+    ./generators/nebula-cert.nix
   ];
 
   options = with types; {
@@ -232,7 +233,7 @@ in
       '')
       (pkgs: ''
         export PATH="${makeBinPath (with pkgs; [
-          pass # gnupg
+          # Use "pass" and "gnupg" from current environment
           jq ssh-to-age
           (writeShellApplication {
             name = "sops-update";
@@ -282,10 +283,10 @@ in
     # because sops and ssh-to-pgp utility require
     # managing GPG keystore in home directory,
     # and it is an unnecessary burden
-    services.openssh.hostKeys = mkForce [{
-      path = "/etc/ssh/ssh_host_ed25519_key";
-      rounds = 100;
-      type = "ed25519";
-    }];
+    # services.openssh.hostKeys = mkForce [{
+    #   path = "/etc/ssh/ssh_host_ed25519_key";
+    #   rounds = 100;
+    #   type = "ed25519";
+    # }];
   };
 }

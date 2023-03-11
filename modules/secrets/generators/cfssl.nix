@@ -35,7 +35,7 @@ in
           cfssl
         ])}:$PATH"
 
-        function get_cert() {
+        function get_cfssl_cert() {
           local suffix="$1"
           local base_path="$2"
           local ca="$3"
@@ -45,7 +45,7 @@ in
           local path="$base_path$suffix"
 
           if ! secret_read "$path"; then
-            log GEN "using cfssl $ca"
+            log GEN "using cfssl, base path: $base_path"
 
             (
               tmpdir="$(mktemp -d)"
@@ -79,8 +79,8 @@ in
     ];
 
     secrets.generators = {
-      mkCert.private = { path, ca, profile, csr }: secret: "get_cert '-key' ${escapeShellArgs [ path ca profile (mkCsr csr) ]}";
-      mkCert.public = { path, ca, profile, csr }: secret: "get_cert '' ${escapeShellArgs [ path ca profile (mkCsr csr) ]}";
+      mkCert.private = { path, ca, profile, csr }: secret: "get_cfssl_cert '-key' ${escapeShellArgs [ path ca profile (mkCsr csr) ]}";
+      mkCert.public = { path, ca, profile, csr }: secret: "get_cfssl_cert '' ${escapeShellArgs [ path ca profile (mkCsr csr) ]}";
     };
   };
 }

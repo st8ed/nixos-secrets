@@ -21,6 +21,18 @@ with lib;
             n: v: v.mount.enable
           )
           config.secrets.files);
+
+      # TODO: Currently only ed25519 host keys are allowed
+      # because sops and ssh-to-pgp utility require
+      # managing GPG keystore in home directory,
+      # and it is an unnecessary burden
+      # services.openssh.hostKeys = mkForce [{
+      #   path = "/etc/ssh/ssh_host_ed25519_key";
+      #   rounds = 100;
+      #   type = "ed25519";
+      # }];
+      gnupg.sshKeyPaths = [];
     };
+
   };
 }
