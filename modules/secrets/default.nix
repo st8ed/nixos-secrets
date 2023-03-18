@@ -22,7 +22,7 @@ in
     ./pki.nix
 
     ./generators/random.nix
-    ./generators/hostkey-openssh.nix
+    ./generators/hostkey-age.nix
     ./generators/cfssl.nix
     ./generators/kubeconfig.nix
     ./generators/nebula-cert.nix
@@ -178,7 +178,7 @@ in
           local ret=0
 
           SOPS_PGP_FP="$(tr "\n" ',' <"$PASSWORD_STORE_DIR/.gpg-id" | head -c -1)" \
-          SOPS_AGE_RECIPIENTS="$(ssh-to-age <<<"$host_keys")" \
+          SOPS_AGE_RECIPIENTS="$host_keys" \
             sops-update "$out" <<<"$secrets" || ret=$?
 
           if [ $ret -eq 0 ]; then
@@ -242,7 +242,7 @@ in
       (pkgs: ''
         export PATH="${makeBinPath (with pkgs; [
           # Use "pass" and "gnupg" from current environment
-          jq ssh-to-age
+          jq
           (writeShellApplication {
             name = "sops-update";
             runtimeInputs = [ sops diffutils jq ];
@@ -286,15 +286,5 @@ in
         }
       '')
     ];
-
-    # TODO: Currently only ed25519 host keys are allowed
-    # because sops and ssh-to-pgp utility require
-    # managing GPG keystore in home directory,
-    # and it is an unnecessary burden
-    # services.openssh.hostKeys = mkForce [{
-    #   path = "/etc/ssh/ssh_host_ed25519_key";
-    #   rounds = 100;
-    #   type = "ed25519";
-    # }];
   };
 }

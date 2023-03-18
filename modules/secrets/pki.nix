@@ -86,11 +86,13 @@ let
       // (lib.optionalAttrs (cfg.format == "nebula" && isCA) {
         name = cfg.cn;
         ip = "";
+        subnets = "";
         groups = "";
       })
       // (lib.optionalAttrs (cfg.format == "nebula" && !isCA) {
         name = csr.cn;
-        ip = assert (builtins.length csr.altNames == 1); builtins.head csr.altNames;
+        ip = builtins.head csr.altNames;
+        subnets = builtins.concatStringsSep "," (lib.drop 1 csr.altNames);
         groups = if csr ? organization then csr.organization else "";
       });
 
@@ -104,6 +106,9 @@ let
         mount.enable = if (mount ? private) then mount.private else !isCA;
         mount.user = mkIf (mount ? user) mount.user;
         mount.mode = "0400";
+
+        mount.restartUnits = optionals (mount ? restartUnits) mount.restartUnits;
+        mount.reloadUnits = optionals (mount ? reloadUnits) mount.reloadUnits;
       };
 
       "${cfg.name}-${name}" = {
@@ -114,6 +119,9 @@ let
         mount.enable = if (mount ? public) then mount.public else true;
         mount.user = "root";
         mount.mode = "0444";
+
+        mount.restartUnits = optionals (mount ? restartUnits) mount.restartUnits;
+        mount.reloadUnits = optionals (mount ? reloadUnits) mount.reloadUnits;
       };
     };
 

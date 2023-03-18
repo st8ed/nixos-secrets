@@ -25,7 +25,8 @@ in
           local ca="$3"
           local name="$4"
           local ip="$5"
-          local groups="$6"
+          local subnets="$6"
+          local groups="$7"
 
           local path="$base_path$suffix"
 
@@ -51,6 +52,7 @@ in
                       -ca-key <(secret_read "$ca-key") \
                       -name "$name" \
                       -ip "$ip" \
+                      -subnets "$subnets" \
                       -groups "$groups" \
                       -out-crt cert.crt \
                       -out-key cert.key
@@ -69,8 +71,8 @@ in
     ];
 
     secrets.generators = {
-      mkNebulaCert.private = { path, ca, name, ip, groups }: secret: "get_nebula_cert '-key' ${escapeShellArgs [ path ca name ip groups ]}";
-      mkNebulaCert.public = { path, ca, name, ip, groups }: secret: "get_nebula_cert '' ${escapeShellArgs [ path ca name ip groups ]}";
+      mkNebulaCert.private = { path, ca, name, ip, subnets, groups }: secret: "get_nebula_cert '-key' ${escapeShellArgs [ path ca name ip subnets groups ]}";
+      mkNebulaCert.public = { path, ca, name, ip, subnets, groups }: secret: "get_nebula_cert '' ${escapeShellArgs [ path ca name ip subnets groups ]}";
     };
   };
 }
