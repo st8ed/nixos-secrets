@@ -126,6 +126,11 @@ in
       readOnly = true;
       default = cfg.build.builder pkgs;
     };
+
+    secrets.install.toplevel = mkOption {
+      type = package;
+      readOnly = true;
+    };
   };
 
   config = {
@@ -286,5 +291,25 @@ in
         }
       '')
     ];
+
+    secrets.install.toplevel = pkgs.writeShellApplication {
+      name = "install-sops-secret-${config.system.name}-${config.system.nixos.label}";
+      text = ''
+        set -ex
+        export PATH=/run/current-system/sw/bin:~/.nix-profile/bin
+
+        # shellcheck disable=SC2087
+        ssh "$1" sh <<EOT
+        set -ex
+        mkdir -p /var/lib/sops-nix
+        touch /var/lib/sops-nix/key.txt
+        chown 0:0 /var/lib/sops-nix/key.txt
+        chmod 600 /var/lib/sops-nix/key.txt
+        cat <<EOK >/var/lib/sops-nix/key.txt
+        $(pass show "${cfg.hostKeyName}")
+        EOK
+        EOT
+      '';
+    };
   };
 }
